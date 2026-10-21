@@ -46,3 +46,5 @@ Optional settings are `TELEGRAM_POLL_INTERVAL_MS`, `TELEGRAM_STATE_FILE`, `TELEG
 
 Open record ↗
 ```
+
+The repository also includes a GitHub Actions fallback at `.github/workflows/falcon-telegram-watcher.yml`. It runs every 5 minutes, stores the last seen record in the repository, and keeps the Telegram credentials in GitHub Secrets. The first manual run completed successfully.

@@ -165,7 +165,9 @@ Open record ↗
 
 The watcher stores its last seen record in `.telegram-watcher-state.json`, which is ignored by Git. Set `TELEGRAM_ANNOUNCE_CURRENT=true` to announce the current record on first run.
 
-Activation status: the watcher code is ready but is not currently running. It requires a rotated Telegram bot token, the group chat ID, and an always-on process. The default polling interval is 60 seconds.
+Activation status: the local watcher process is not running, but the GitHub Actions fallback is active. The local process defaults to 60 seconds. The GitHub Actions schedule runs every 5 minutes.
+
+Deployment fallback: `.github/workflows/falcon-telegram-watcher.yml` is configured with the Telegram credentials in GitHub Secrets. It runs every 5 minutes, persists the last seen record in the repository, and its first manual run completed successfully. This is the active watcher path while Railway deploys are paused.
 
 ## Scope boundaries
 
@@ -264,4 +266,5 @@ Omar's agents can use this repository as the implementation reference without co
 - Changed the GitHub repository visibility to public for direct agent access.
 - Added the Telegram record watcher with a fixed new-record message format and duplicate protection.
 - Added a high-contrast Falcon Telegram bot avatar optimized for a circular profile crop.
+- Added a GitHub Actions watcher fallback with a 5 minute schedule and repository-persisted state. The first manual run completed successfully.
 - PR creation remains blocked until the production frontend repository URL is confirmed.
