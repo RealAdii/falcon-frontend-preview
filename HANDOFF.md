@@ -165,6 +165,8 @@ Open record ↗
 
 The watcher stores its last seen record in `.telegram-watcher-state.json`, which is ignored by Git. Set `TELEGRAM_ANNOUNCE_CURRENT=true` to announce the current record on first run.
 
+Activation status: the watcher code is ready but is not currently running. It requires a rotated Telegram bot token, the group chat ID, and an always-on process. The default polling interval is 60 seconds.
+
 ## Scope boundaries
 
 Do not redesign the content of these subpages in this task:
