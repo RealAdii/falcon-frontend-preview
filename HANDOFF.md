@@ -135,6 +135,7 @@ Do not copy Yukon branding, data, or unrelated terminology.
 - `styles.css`: visual system, compact hero layout, leaderboard styles, responsive states, and reduced motion support
 - `HANDOFF.md`: this integration brief
 - `telegram-watcher.mjs`: record watcher that posts formatted Telegram updates when a new verified record is lower
+- `telegram-bot-avatar.png`: generated Falcon profile image for the Telegram bot
 
 ## Telegram record watcher
 
@@ -260,4 +261,5 @@ Omar's agents can use this repository as the implementation reference without co
 - Packaged the current frontend, assets, and handoff into the GitHub repository above.
 - Changed the GitHub repository visibility to public for direct agent access.
 - Added the Telegram record watcher with a fixed new-record message format and duplicate protection.
+- Added a high-contrast Falcon Telegram bot avatar optimized for a circular profile crop.
 - PR creation remains blocked until the production frontend repository URL is confirmed.
