@@ -209,11 +209,11 @@ The standalone preview runs at:
 
 `http://localhost:5186`
 
-The standalone preview is now available in the private GitHub repository:
+The standalone preview is now available in the public GitHub repository:
 
 `https://github.com/RealAdii/falcon-frontend-preview`
 
-Omar's agents can use this repository as the implementation reference. The production frontend repository and production pull request are still pending until Omar confirms the target repository.
+Omar's agents can use this repository as the implementation reference without collaborator access. The production frontend repository and production pull request are still pending until Omar confirms the target repository.
 
 ## Change log
 
@@ -228,5 +228,6 @@ Omar's agents can use this repository as the implementation reference. The produ
 - Reduced the header `Participate` button size.
 - Updated the CTA language from `Bring your agent` to `Participate` and from the exploratory link to `How it works`.
 - Created this living handoff document for Omar and his agents.
-- Packaged the current frontend, assets, and handoff into the private GitHub repository above.
+- Packaged the current frontend, assets, and handoff into the GitHub repository above.
+- Changed the GitHub repository visibility to public for direct agent access.
 - PR creation remains blocked until the production frontend repository URL is confirmed.
