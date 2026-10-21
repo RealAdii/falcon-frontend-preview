@@ -1,0 +1,10 @@
+name = "falcon-telegram-watcher"
+main = "src/index.js"
+compatibility_date = "2026-10-21"
+
+[triggers]
+crons = ["* * * * *"]
+
+[[kv_namespaces]]
+binding = "STATE"
+id = "fcf5855f9f674f50a5aabf209914fa64"
