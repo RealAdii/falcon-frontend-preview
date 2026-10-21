@@ -44,15 +44,17 @@ async function fetchBoard() {
   return {record: {...record, score_l2_gas: Number(record.score_l2_gas)}, baseline};
 }
 
-function formatMessage(record, baseline) {
-  const saved = Math.max(0, baseline - record.score_l2_gas);
-  const percent = baseline > 0 ? ((saved / baseline) * 100).toFixed(1) : '0.0';
+function formatMessage(record, comparisonGas) {
+  const saved = Math.max(0, comparisonGas - record.score_l2_gas);
+  const percent = comparisonGas > 0 ? ((saved / comparisonGas) * 100).toFixed(1) : '0.0';
   const contributor = record.github_login || 'Open contributor';
   const model = record.model || record.model_name || 'Evaluator run';
   const jobLink = record.job_id ? `https://falcon.provably.fast/code?job=${encodeURIComponent(record.job_id)}` : 'https://falcon.provably.fast/record';
   return [
     '🏆 <b>NEW FALCON RECORD</b>',
+    '',
     `${escapeHtml(contributor)} · ${escapeHtml(model)}`,
+    '',
     `<b>${formatGas(record.score_l2_gas)} gas</b>`,
     `<b>${percent}% less gas</b> · ${formatGas(saved)} gas saved`,
     '',
@@ -75,7 +77,7 @@ async function checkOnce() {
   const isNewRecord = Number.isFinite(state.recordGas) && record.score_l2_gas < state.recordGas;
   const shouldAnnounce = isNewRecord || (state.recordGas === null && announceCurrent);
   if (shouldAnnounce) {
-    await sendTelegram(formatMessage(record, baseline));
+    await sendTelegram(formatMessage(record, Number(state.recordGas)));
     console.log(`Announced record: ${record.score_l2_gas}`);
   } else {
     console.log(`Checked record: ${record.score_l2_gas}`);

@@ -10,9 +10,9 @@ const escapeHtml = (value) => String(value ?? '')
 
 const formatGas = (value) => Number(value).toLocaleString('en-US');
 
-function formatMessage(record, baseline) {
-  const saved = Math.max(0, baseline - record.score_l2_gas);
-  const percent = baseline > 0 ? ((saved / baseline) * 100).toFixed(1) : '0.0';
+function formatMessage(record, comparisonGas) {
+  const saved = Math.max(0, comparisonGas - record.score_l2_gas);
+  const percent = comparisonGas > 0 ? ((saved / comparisonGas) * 100).toFixed(1) : '0.0';
   const contributor = record.github_login || 'Open contributor';
   const model = record.model || record.model_name || 'Evaluator run';
   const jobLink = record.job_id
@@ -87,7 +87,7 @@ async function checkForRecord(env) {
     job_id: record.job_id
   }));
 
-  if (shouldAnnounce) await sendTelegram(formatMessage(record, baseline), env);
+  if (shouldAnnounce) await sendTelegram(formatMessage(record, Number(previous.score_l2_gas)), env);
   if (!previous || record.score_l2_gas < Number(previous.score_l2_gas)) {
     await env.STATE.put(STATE_KEY, JSON.stringify({score_l2_gas: record.score_l2_gas, job_id: record.job_id, updated_at: new Date().toISOString()}));
     console.log('Falcon watcher state updated');

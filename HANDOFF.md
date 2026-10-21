@@ -79,12 +79,12 @@ Display the current record plus the next five verified results. Each row should 
 - Contributor name
 - Shortened result title
 - Gas result
-- Percentage of gas saved against the baseline
-- Absolute gas saved against the baseline
+- Percentage of gas saved against the previous best record
+- Absolute gas saved against the previous best record
 - Model name
 - Crown for first place, silver marker for second, bronze marker for third
 
-Use the current `baseline.score_l2_gas` value for percentage and absolute savings. Do not calculate the percentage from `times_cheaper` alone.
+For new-record announcements, use the previous stored record score for percentage and absolute savings. The landing page can continue to show baseline-relative progress. Do not calculate the announcement percentage from `times_cheaper` alone.
 
 The leaderboard should include:
 
