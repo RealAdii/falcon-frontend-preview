@@ -1,5 +1,6 @@
 const RESULTS_URL = 'https://falcon.provably.fast/api/participation/falcon/results';
 const STATE_KEY = 'latest-record';
+const MEDIA_URL = 'https://raw.githubusercontent.com/RealAdii/falcon-frontend-preview/main/assets/swapped.mp4';
 
 const escapeHtml = (value) => String(value ?? '')
   .replaceAll('&', '&amp;')
@@ -43,10 +44,18 @@ async function getBoard() {
 }
 
 async function sendTelegram(text, env) {
-  const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+  const media = await fetch(MEDIA_URL);
+  if (!media.ok) throw new Error(`Announcement media returned ${media.status}`);
+
+  const form = new FormData();
+  form.append('chat_id', env.TELEGRAM_CHAT_ID);
+  form.append('video', await media.blob(), 'swapped.mp4');
+  form.append('caption', text);
+  form.append('parse_mode', 'HTML');
+
+  const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendVideo`, {
     method: 'POST',
-    headers: {'content-type': 'application/json'},
-    body: JSON.stringify({chat_id: env.TELEGRAM_CHAT_ID, text, parse_mode: 'HTML', disable_web_page_preview: true})
+    body: form
   });
   if (!response.ok) throw new Error(`Telegram returned ${response.status}`);
 }
