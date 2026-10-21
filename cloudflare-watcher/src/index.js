@@ -53,10 +53,15 @@ async function sendTelegram(text, env) {
 
 export default {
   async scheduled(controller, env, ctx) {
-    ctx.waitUntil(checkForRecord(env));
+    try {
+      await checkForRecord(env);
+    } catch (error) {
+      console.error('Falcon watcher failed', error instanceof Error ? error.stack : error);
+      throw error;
+    }
   },
 
-  async fetch() {
+  async fetch(request, env) {
     return new Response('Falcon Telegram watcher is running.');
   }
 };
@@ -66,8 +71,16 @@ async function checkForRecord(env) {
   const previous = await env.STATE.get(STATE_KEY, 'json');
   const shouldAnnounce = previous && record.score_l2_gas < Number(previous.score_l2_gas);
 
+  console.log(JSON.stringify({
+    current_score_l2_gas: record.score_l2_gas,
+    previous_score_l2_gas: previous?.score_l2_gas ?? null,
+    should_announce: Boolean(shouldAnnounce),
+    job_id: record.job_id
+  }));
+
   if (shouldAnnounce) await sendTelegram(formatMessage(record, baseline), env);
   if (!previous || record.score_l2_gas < Number(previous.score_l2_gas)) {
     await env.STATE.put(STATE_KEY, JSON.stringify({score_l2_gas: record.score_l2_gas, job_id: record.job_id, updated_at: new Date().toISOString()}));
+    console.log('Falcon watcher state updated');
   }
 }
