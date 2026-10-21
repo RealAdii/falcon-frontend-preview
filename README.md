@@ -1,0 +1,25 @@
+# Falcon frontend
+
+A complete responsive frontend redesign for falcon.provably.fast, prepared for integration with its existing production backend.
+
+## Run locally
+
+Requires Node.js 20 or newer. No dependency installation is needed.
+
+```sh
+npm run dev
+```
+
+Open http://localhost:5186. Run `npm run check` to check JavaScript syntax.
+
+## Pages
+
+The frontend includes the challenge homepage, live records, safety model, scoring rules, current record code and patch, research tracks, and discussion handoff. The result board and record patches are served through read-only local proxies to the public evaluator. Discussion accounts and posts remain on the live discussion service. The full agent brief remains at its canonical live URL.
+
+## Handoff
+
+This is a standalone implementation prepared before access to the production repository. `server.mjs` is a local preview server, not a replacement for the production backend. Integrate the static assets and route rendering into the existing frontend pipeline. Preserve the current API, evaluator, discussion service, and submission behavior. No production push or deployment has been made.
+
+The homepage reads `/api/participation/falcon/results`, validates the schema, lane, and scores, then displays live baseline and record values. On service failure, it labels the fallback as an October 19 snapshot and offers Retry. The cost-flight path samples real intermediate records. The falcon and gas counter follow the same value, and the fixed baseline remains visible. The flight runs once with explicit replay and pause controls, respects reduced motion, and pauses offscreen or when the tab is hidden.
+
+Typography follows the live site's Inter and system sans stack with its system monospace stack. Brand colors, mark, favicon, mascot, and partner logos use the live site's assets. The design keeps responsive spacing and readable type on small screens.
