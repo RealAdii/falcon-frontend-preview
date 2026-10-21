@@ -134,6 +134,35 @@ Do not copy Yukon branding, data, or unrelated terminology.
 - `app.js`: flight animation, live record loading, leaderboard loading, formatting, and safe text escaping
 - `styles.css`: visual system, compact hero layout, leaderboard styles, responsive states, and reduced motion support
 - `HANDOFF.md`: this integration brief
+- `telegram-watcher.mjs`: record watcher that posts formatted Telegram updates when a new verified record is lower
+
+## Telegram record watcher
+
+The standalone repository includes a dependency-free watcher for broadcasting new verified records into a Telegram group. It polls `/api/participation/falcon/results`, seeds the current record on first run without posting, and only announces a later record when its gas score is lower.
+
+Required environment variables:
+
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
+
+Run it with:
+
+```sh
+npm run watch:telegram
+```
+
+The message format is:
+
+```text
+🏆 NEW FALCON RECORD
+@contributor · model
+26,540,952 gas
+45.2% less gas · 21,857,514 gas saved
+Result title
+Open record ↗
+```
+
+The watcher stores its last seen record in `.telegram-watcher-state.json`, which is ignored by Git. Set `TELEGRAM_ANNOUNCE_CURRENT=true` to announce the current record on first run.
 
 ## Scope boundaries
 
@@ -230,4 +259,5 @@ Omar's agents can use this repository as the implementation reference without co
 - Created this living handoff document for Omar and his agents.
 - Packaged the current frontend, assets, and handoff into the GitHub repository above.
 - Changed the GitHub repository visibility to public for direct agent access.
+- Added the Telegram record watcher with a fixed new-record message format and duplicate protection.
 - PR creation remains blocked until the production frontend repository URL is confirmed.

@@ -23,3 +23,26 @@ This is a standalone implementation prepared before access to the production rep
 The homepage reads `/api/participation/falcon/results`, validates the schema, lane, and scores, then displays live baseline and record values. On service failure, it labels the fallback as an October 19 snapshot and offers Retry. The cost-flight path samples real intermediate records. The falcon and gas counter follow the same value, and the fixed baseline remains visible. The flight runs once with explicit replay and pause controls, respects reduced motion, and pauses offscreen or when the tab is hidden.
 
 Typography follows the live site's Inter and system sans stack with its system monospace stack. Brand colors, mark, favicon, mascot, and partner logos use the live site's assets. The design keeps responsive spacing and readable type on small screens.
+
+## Telegram record watcher
+
+`telegram-watcher.mjs` polls the public Falcon results endpoint and posts one message to a Telegram chat when the verified gas record gets lower. The first run seeds the current record without posting. Set `TELEGRAM_ANNOUNCE_CURRENT=true` if the current record should be posted on first run.
+
+Set these environment variables on the machine that will run the watcher:
+
+```sh
+export TELEGRAM_BOT_TOKEN='replace-with-bot-token'
+export TELEGRAM_CHAT_ID='replace-with-group-chat-id'
+npm run watch:telegram
+```
+
+Optional settings are `TELEGRAM_POLL_INTERVAL_MS`, `TELEGRAM_STATE_FILE`, `TELEGRAM_ONCE`, and `TELEGRAM_ANNOUNCE_CURRENT`. The watcher format is:
+
+```text
+🏆 NEW FALCON RECORD
+@contributor · model
+26,540,952 gas
+45.2% less gas · 21,857,514 gas saved
+Result title
+Open record ↗
+```
