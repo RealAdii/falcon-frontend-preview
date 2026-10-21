@@ -47,7 +47,7 @@ async function fetchBoard() {
 function formatMessage(record, baseline) {
   const saved = Math.max(0, baseline - record.score_l2_gas);
   const percent = baseline > 0 ? ((saved / baseline) * 100).toFixed(1) : '0.0';
-  const contributor = record.github_login ? `@${record.github_login}` : 'Open contributor';
+  const contributor = record.github_login || 'Open contributor';
   const model = record.model || record.model_name || 'Evaluator run';
   const jobLink = record.job_id ? `https://falcon.provably.fast/code?job=${encodeURIComponent(record.job_id)}` : 'https://falcon.provably.fast/record';
   return [

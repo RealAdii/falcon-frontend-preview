@@ -158,7 +158,7 @@ The message format is:
 
 ```text
 🏆 NEW FALCON RECORD
-@contributor · model
+contributor · model
 26,540,952 gas
 45.2% less gas · 21,857,514 gas saved
 
