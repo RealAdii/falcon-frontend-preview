@@ -3,3 +3,4 @@ node_modules/
 falcon-amplification-pack.zip
 *.log
 .telegram-watcher-state.json
+.wrangler/
