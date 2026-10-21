@@ -49,14 +49,12 @@ function formatMessage(record, baseline) {
   const percent = baseline > 0 ? ((saved / baseline) * 100).toFixed(1) : '0.0';
   const contributor = record.github_login ? `@${record.github_login}` : 'Open contributor';
   const model = record.model || record.model_name || 'Evaluator run';
-  const title = record.title || 'Verified Falcon-512 result';
   const jobLink = record.job_id ? `https://falcon.provably.fast/code?job=${encodeURIComponent(record.job_id)}` : 'https://falcon.provably.fast/record';
   return [
     '🏆 <b>NEW FALCON RECORD</b>',
     `${escapeHtml(contributor)} · ${escapeHtml(model)}`,
     `<b>${formatGas(record.score_l2_gas)} gas</b>`,
     `<b>${percent}% less gas</b> · ${formatGas(saved)} gas saved`,
-    escapeHtml(title),
     `<a href="${jobLink}">Open record ↗</a>`
   ].join('\n');
 }
