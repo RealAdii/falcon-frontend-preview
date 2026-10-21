@@ -136,6 +136,8 @@ Do not copy Yukon branding, data, or unrelated terminology.
 - `HANDOFF.md`: this integration brief
 - `telegram-watcher.mjs`: record watcher that posts formatted Telegram updates when a new verified record is lower
 - `telegram-bot-avatar.png`: generated Falcon profile image for the Telegram bot
+- `cloudflare-watcher/src/index.js`: Cloudflare scheduled Worker implementation
+- `cloudflare-watcher/wrangler.toml`: one-minute Cron Trigger and KV binding configuration
 
 ## Telegram record watcher
 
@@ -167,7 +169,7 @@ The watcher stores its last seen record in `.telegram-watcher-state.json`, which
 
 Activation status: the local watcher process is not running, but the GitHub Actions fallback is active. The local process defaults to 60 seconds. The GitHub Actions schedule runs every 5 minutes.
 
-Deployment fallback: `.github/workflows/falcon-telegram-watcher.yml` is configured with the Telegram credentials in GitHub Secrets. It runs every 5 minutes, persists the last seen record in the repository, and its first manual run completed successfully. This is the active watcher path while Railway deploys are paused.
+Deployment status: a Cloudflare Worker is deployed with a `* * * * *` Cron Trigger, KV state, and Cloudflare-managed Telegram secrets. The Worker endpoint is `https://falcon-telegram-watcher.work-adithyadinesh-d25.workers.dev`. GitHub Actions remains as a 5 minute fallback while Railway deploys are paused.
 
 ## Scope boundaries
 
@@ -267,4 +269,5 @@ Omar's agents can use this repository as the implementation reference without co
 - Added the Telegram record watcher with a fixed new-record message format and duplicate protection.
 - Added a high-contrast Falcon Telegram bot avatar optimized for a circular profile crop.
 - Added a GitHub Actions watcher fallback with a 5 minute schedule and repository-persisted state. The first manual run completed successfully.
+- Added and deployed a Cloudflare Worker with a `* * * * *` Cron Trigger, KV state, and Cloudflare-managed Telegram secrets. The Worker endpoint is `https://falcon-telegram-watcher.work-adithyadinesh-d25.workers.dev`.
 - PR creation remains blocked until the production frontend repository URL is confirmed.
