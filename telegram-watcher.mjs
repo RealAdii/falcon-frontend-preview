@@ -55,6 +55,7 @@ function formatMessage(record, baseline) {
     `${escapeHtml(contributor)} · ${escapeHtml(model)}`,
     `<b>${formatGas(record.score_l2_gas)} gas</b>`,
     `<b>${percent}% less gas</b> · ${formatGas(saved)} gas saved`,
+    '',
     `<a href="${jobLink}">Open record ↗</a>`
   ].join('\n');
 }

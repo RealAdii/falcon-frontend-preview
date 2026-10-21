@@ -43,5 +43,6 @@ Optional settings are `TELEGRAM_POLL_INTERVAL_MS`, `TELEGRAM_STATE_FILE`, `TELEG
 @contributor · model
 26,540,952 gas
 45.2% less gas · 21,857,514 gas saved
+
 Open record ↗
 ```
