@@ -141,7 +141,7 @@ Do not copy Yukon branding, data, or unrelated terminology.
 
 ## Telegram record watcher
 
-The deployed Cloudflare Worker broadcasts verified Falcon and ML-DSA-44 records into a Telegram group. It polls `/api/participation/falcon/results` and `/api/participation/mldsa/results`, keeps separate KV state for each benchmark, seeds each current record on first run without posting, and announces later records only when their score is lower than the previous best.
+The deployed Cloudflare Worker broadcasts verified Falcon, Falcon-1024, ML-DSA-44, and ML-DSA-87 records into a Telegram group. It polls `/api/participation/falcon/results`, `/api/participation/falcon1024/results`, `/api/participation/mldsa/results`, and `/api/participation/mldsa87/results`, keeps separate KV state for each benchmark, seeds each current record on first run without posting, and announces later records only when their score is lower than the previous best.
 
 Required environment variables:
 
@@ -167,7 +167,7 @@ Open record ↗
 
 The watcher stores its last seen record in `.telegram-watcher-state.json`, which is ignored by Git. Set `TELEGRAM_ANNOUNCE_CURRENT=true` to announce the current record on first run.
 
-ML-DSA-44 uses the same format with the heading `NEW ML-DSA-44 RECORD` and the asset `assets/mldsa44.mp4`. Falcon uses `assets/swapped.mp4`. Usernames are plain text without an `@` prefix, so Telegram does not tag contributors.
+ML-DSA-44 and ML-DSA-87 use the heading `NEW ML-DSA-44 RECORD` or `NEW ML-DSA-87 RECORD` and the asset `assets/mldsa44.mp4`. Falcon and Falcon-1024 use `assets/swapped.mp4`. Usernames are plain text without an `@` prefix, so Telegram does not tag contributors.
 
 Activation status: the local watcher process is not running. The local process defaults to 60 seconds and is available for manual recovery. GitHub Actions automatic scheduling is disabled to prevent duplicate announcements.
 
@@ -274,4 +274,5 @@ Omar's agents can use this repository as the implementation reference without co
 - Added and deployed a Cloudflare Worker with a `* * * * *` Cron Trigger, KV state, and Cloudflare-managed Telegram secrets. The Worker endpoint is `https://falcon-telegram-watcher.work-adithyadinesh-d25.workers.dev`.
 - Added ML-DSA-44 monitoring through `/api/participation/mldsa/results`, with separate state and the `assets/mldsa44.mp4` announcement video.
 - Kept Falcon and ML-DSA-44 state independent, so a record in one benchmark cannot suppress or duplicate a record in the other.
+- Added Falcon-1024 and ML-DSA-87 monitoring through `/api/participation/falcon1024/results` and `/api/participation/mldsa87/results`, each with independent state and benchmark-specific announcement headings.
 - PR creation remains blocked until the production frontend repository URL is confirmed.

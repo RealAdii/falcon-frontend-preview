@@ -16,6 +16,22 @@ const WATCHES = [
     lane: 'ML_DSA_44_GAS',
     stateKey: 'latest-mldsa44-record',
     mediaUrl: `${REPO_RAW_URL}/mldsa44.mp4`
+  },
+  {
+    name: 'FALCON1024',
+    title: 'NEW FALCON-1024 RECORD',
+    resultsUrl: `${BASE_URL}/api/participation/falcon1024/results`,
+    lane: 'FALCON_1024_GAS',
+    stateKey: 'latest-falcon1024-record',
+    mediaUrl: `${REPO_RAW_URL}/swapped.mp4`
+  },
+  {
+    name: 'MLDSA87',
+    title: 'NEW ML-DSA-87 RECORD',
+    resultsUrl: `${BASE_URL}/api/participation/mldsa87/results`,
+    lane: 'ML_DSA_87_GAS',
+    stateKey: 'latest-mldsa87-record',
+    mediaUrl: `${REPO_RAW_URL}/mldsa44.mp4`
   }
 ];
 
