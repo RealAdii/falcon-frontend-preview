@@ -134,14 +134,14 @@ Do not copy Yukon branding, data, or unrelated terminology.
 - `app.js`: flight animation, live record loading, leaderboard loading, formatting, and safe text escaping
 - `styles.css`: visual system, compact hero layout, leaderboard styles, responsive states, and reduced motion support
 - `HANDOFF.md`: this integration brief
-- `telegram-watcher.mjs`: record watcher that posts formatted Telegram updates when a new verified record is lower
+- `telegram-watcher.mjs`: local Falcon record watcher for manual recovery
 - `telegram-bot-avatar.png`: generated Falcon profile image for the Telegram bot
-- `cloudflare-watcher/src/index.js`: Cloudflare scheduled Worker implementation
+- `cloudflare-watcher/src/index.js`: Cloudflare scheduled Worker implementation for Falcon and ML-DSA-44
 - `cloudflare-watcher/wrangler.toml`: one-minute Cron Trigger and KV binding configuration
 
 ## Telegram record watcher
 
-The standalone repository includes a dependency-free watcher for broadcasting new verified records into a Telegram group. It polls `/api/participation/falcon/results`, seeds the current record on first run without posting, and only announces a later record when its gas score is lower.
+The deployed Cloudflare Worker broadcasts verified Falcon and ML-DSA-44 records into a Telegram group. It polls `/api/participation/falcon/results` and `/api/participation/mldsa/results`, keeps separate KV state for each benchmark, seeds each current record on first run without posting, and announces later records only when their score is lower than the previous best.
 
 Required environment variables:
 
@@ -154,7 +154,7 @@ Run it with:
 npm run watch:telegram
 ```
 
-The message format is:
+The Falcon message format is:
 
 ```text
 🏆 NEW FALCON RECORD
@@ -167,9 +167,11 @@ Open record ↗
 
 The watcher stores its last seen record in `.telegram-watcher-state.json`, which is ignored by Git. Set `TELEGRAM_ANNOUNCE_CURRENT=true` to announce the current record on first run.
 
-Activation status: the local watcher process is not running, but the GitHub Actions fallback is active. The local process defaults to 60 seconds. The GitHub Actions schedule runs every 5 minutes.
+ML-DSA-44 uses the same format with the heading `NEW ML-DSA-44 RECORD` and the asset `assets/mldsa44.mp4`. Falcon uses `assets/swapped.mp4`. Usernames are plain text without an `@` prefix, so Telegram does not tag contributors.
 
-Deployment status: a Cloudflare Worker is deployed with a `* * * * *` Cron Trigger, KV state, and Cloudflare-managed Telegram secrets. The Worker endpoint is `https://falcon-telegram-watcher.work-adithyadinesh-d25.workers.dev`. GitHub Actions remains as a 5 minute fallback while Railway deploys are paused.
+Activation status: the local watcher process is not running. The local process defaults to 60 seconds and is available for manual recovery. GitHub Actions automatic scheduling is disabled to prevent duplicate announcements.
+
+Deployment status: a Cloudflare Worker is deployed with a `* * * * *` Cron Trigger, separate KV state keys, and Cloudflare-managed Telegram secrets. The Worker endpoint is `https://falcon-telegram-watcher.work-adithyadinesh-d25.workers.dev`.
 
 ## Scope boundaries
 
@@ -270,4 +272,6 @@ Omar's agents can use this repository as the implementation reference without co
 - Added a high-contrast Falcon Telegram bot avatar optimized for a circular profile crop.
 - Added a GitHub Actions watcher fallback with a 5 minute schedule and repository-persisted state. The first manual run completed successfully.
 - Added and deployed a Cloudflare Worker with a `* * * * *` Cron Trigger, KV state, and Cloudflare-managed Telegram secrets. The Worker endpoint is `https://falcon-telegram-watcher.work-adithyadinesh-d25.workers.dev`.
+- Added ML-DSA-44 monitoring through `/api/participation/mldsa/results`, with separate state and the `assets/mldsa44.mp4` announcement video.
+- Kept Falcon and ML-DSA-44 state independent, so a record in one benchmark cannot suppress or duplicate a record in the other.
 - PR creation remains blocked until the production frontend repository URL is confirmed.
