@@ -275,4 +275,5 @@ Omar's agents can use this repository as the implementation reference without co
 - Added ML-DSA-44 monitoring through `/api/participation/mldsa/results`, with separate state and the `assets/mldsa44.mp4` announcement video.
 - Kept Falcon and ML-DSA-44 state independent, so a record in one benchmark cannot suppress or duplicate a record in the other.
 - Added Falcon-1024 and ML-DSA-87 monitoring through `/api/participation/falcon1024/results` and `/api/participation/mldsa87/results`, each with independent state and benchmark-specific announcement headings.
+- Backfilled the first Falcon-1024 and ML-DSA-87 announcements after their initial silent seed. The temporary backfill route was removed immediately after both messages were sent.
 - PR creation remains blocked until the production frontend repository URL is confirmed.
