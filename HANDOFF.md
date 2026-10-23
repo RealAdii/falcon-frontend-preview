@@ -169,7 +169,7 @@ Open record ↗
 
 The watcher stores its last seen record in `.telegram-watcher-state.json`, which is ignored by Git. Set `TELEGRAM_ANNOUNCE_CURRENT=true` to announce the current record on first run.
 
-ML-DSA-44 and ML-DSA-87 use the heading `NEW ML-DSA-44 RECORD` or `NEW ML-DSA-87 RECORD` and the asset `assets/mldsa44.mp4`. Falcon and Falcon-1024 use `assets/swapped.mp4`. Usernames are plain text without an `@` prefix, so Telegram does not tag contributors.
+Each challenge has its own video: Falcon-512 uses `assets/swapped.mp4`, Falcon-1024 uses `assets/falcon1024.mp4`, ML-DSA-44 uses `assets/mldsa44.mp4`, and ML-DSA-87 uses `assets/mldsa87.mp4`. Usernames are plain text without an `@` prefix, so Telegram does not tag contributors.
 
 Activation status: the local watcher process is not running. The local process defaults to 60 seconds and is available for manual recovery. GitHub Actions automatic scheduling is disabled to prevent duplicate announcements.
 
@@ -279,4 +279,5 @@ Omar's agents can use this repository as the implementation reference without co
 - Added Falcon-1024 and ML-DSA-87 monitoring through `/api/participation/falcon1024/results` and `/api/participation/mldsa87/results`, each with independent state and benchmark-specific announcement headings.
 - Backfilled the first Falcon-1024 and ML-DSA-87 announcements after their initial silent seed. The temporary backfill route was removed immediately after both messages were sent.
 - Routed all four Telegram record videos into their matching forum topics: Falcon-512 `437`, Falcon-1024 `438`, ML-DSA-44 `440`, and ML-DSA-87 `441`.
+- Added distinct Falcon-1024 and ML-DSA-87 videos from `hmmm.gif.mp4` and `odi.gif.mp4` respectively, so every challenge now has its own media asset.
 - PR creation remains blocked until the production frontend repository URL is confirmed.

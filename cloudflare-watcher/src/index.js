@@ -25,7 +25,7 @@ const WATCHES = [
     resultsUrl: `${BASE_URL}/api/participation/falcon1024/results`,
     lane: 'FALCON_1024_GAS',
     stateKey: 'latest-falcon1024-record',
-    mediaUrl: `${REPO_RAW_URL}/swapped.mp4`,
+    mediaUrl: `${REPO_RAW_URL}/falcon1024.mp4`,
     threadId: 438
   },
   {
@@ -34,7 +34,7 @@ const WATCHES = [
     resultsUrl: `${BASE_URL}/api/participation/mldsa87/results`,
     lane: 'ML_DSA_87_GAS',
     stateKey: 'latest-mldsa87-record',
-    mediaUrl: `${REPO_RAW_URL}/mldsa44.mp4`,
+    mediaUrl: `${REPO_RAW_URL}/mldsa87.mp4`,
     threadId: 441
   }
 ];
@@ -86,7 +86,7 @@ async function sendTelegram(text, mediaUrl, threadId, env) {
 
   const form = new FormData();
   form.append('chat_id', env.TELEGRAM_CHAT_ID);
-  form.append('video', await media.blob(), 'swapped.mp4');
+  form.append('video', await media.blob(), mediaUrl.split('/').pop());
   form.append('caption', text);
   form.append('parse_mode', 'HTML');
   if (threadId !== null) form.append('message_thread_id', String(threadId));
