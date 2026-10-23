@@ -7,7 +7,8 @@ const WATCHES = [
     resultsUrl: `${BASE_URL}/api/participation/falcon/results`,
     lane: 'FALCON_512_GAS',
     stateKey: 'latest-record',
-    mediaUrl: `${REPO_RAW_URL}/swapped.mp4`
+    mediaUrl: `${REPO_RAW_URL}/swapped.mp4`,
+    threadId: 437
   },
   {
     name: 'MLDSA44',
@@ -15,7 +16,8 @@ const WATCHES = [
     resultsUrl: `${BASE_URL}/api/participation/mldsa/results`,
     lane: 'ML_DSA_44_GAS',
     stateKey: 'latest-mldsa44-record',
-    mediaUrl: `${REPO_RAW_URL}/mldsa44.mp4`
+    mediaUrl: `${REPO_RAW_URL}/mldsa44.mp4`,
+    threadId: 440
   },
   {
     name: 'FALCON1024',
@@ -23,7 +25,8 @@ const WATCHES = [
     resultsUrl: `${BASE_URL}/api/participation/falcon1024/results`,
     lane: 'FALCON_1024_GAS',
     stateKey: 'latest-falcon1024-record',
-    mediaUrl: `${REPO_RAW_URL}/swapped.mp4`
+    mediaUrl: `${REPO_RAW_URL}/swapped.mp4`,
+    threadId: 438
   },
   {
     name: 'MLDSA87',
@@ -31,7 +34,8 @@ const WATCHES = [
     resultsUrl: `${BASE_URL}/api/participation/mldsa87/results`,
     lane: 'ML_DSA_87_GAS',
     stateKey: 'latest-mldsa87-record',
-    mediaUrl: `${REPO_RAW_URL}/mldsa44.mp4`
+    mediaUrl: `${REPO_RAW_URL}/mldsa44.mp4`,
+    threadId: null
   }
 ];
 
@@ -76,7 +80,7 @@ async function getBoard(watch) {
   return {record: {...record, score_l2_gas: Number(record.score_l2_gas)}, baseline};
 }
 
-async function sendTelegram(text, mediaUrl, env) {
+async function sendTelegram(text, mediaUrl, threadId, env) {
   const media = await fetch(mediaUrl);
   if (!media.ok) throw new Error(`Announcement media returned ${media.status}`);
 
@@ -85,6 +89,7 @@ async function sendTelegram(text, mediaUrl, env) {
   form.append('video', await media.blob(), 'swapped.mp4');
   form.append('caption', text);
   form.append('parse_mode', 'HTML');
+  if (threadId !== null) form.append('message_thread_id', String(threadId));
 
   const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendVideo`, {
     method: 'POST',
@@ -122,7 +127,8 @@ async function checkForRecord(watch, env) {
     watch: watch.name
   }));
 
-  if (shouldAnnounce) await sendTelegram(formatMessage(record, Number(previous.score_l2_gas), watch.title), watch.mediaUrl, env);
+  if (shouldAnnounce && watch.threadId === null) throw new Error(`${watch.name} topic ID is not configured`);
+  if (shouldAnnounce) await sendTelegram(formatMessage(record, Number(previous.score_l2_gas), watch.title), watch.mediaUrl, watch.threadId, env);
   if (!previous || record.score_l2_gas < Number(previous.score_l2_gas)) {
     await env.STATE.put(watch.stateKey, JSON.stringify({score_l2_gas: record.score_l2_gas, job_id: record.job_id, updated_at: new Date().toISOString()}));
     console.log(`${watch.name} watcher state updated`);
