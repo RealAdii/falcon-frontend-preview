@@ -35,7 +35,7 @@ const WATCHES = [
     lane: 'ML_DSA_87_GAS',
     stateKey: 'latest-mldsa87-record',
     mediaUrl: `${REPO_RAW_URL}/mldsa44.mp4`,
-    threadId: null
+    threadId: 441
   }
 ];
 
