@@ -143,6 +143,8 @@ Do not copy Yukon branding, data, or unrelated terminology.
 
 The deployed Cloudflare Worker broadcasts verified Falcon, Falcon-1024, ML-DSA-44, and ML-DSA-87 records into a Telegram group. It polls `/api/participation/falcon/results`, `/api/participation/falcon1024/results`, `/api/participation/mldsa/results`, and `/api/participation/mldsa87/results`, keeps separate KV state for each benchmark, seeds each current record on first run without posting, and announces later records only when their score is lower than the previous best.
 
+Telegram topic routing: Falcon-512 uses thread `437`, Falcon-1024 uses `438`, and ML-DSA-44 uses `440`. ML-DSA-87 thread ID is still needed. Until it is configured, new ML-DSA-87 records are held without advancing their KV state, so they can be announced after routing is completed.
+
 Required environment variables:
 
 - `TELEGRAM_BOT_TOKEN`
@@ -276,4 +278,5 @@ Omar's agents can use this repository as the implementation reference without co
 - Kept Falcon and ML-DSA-44 state independent, so a record in one benchmark cannot suppress or duplicate a record in the other.
 - Added Falcon-1024 and ML-DSA-87 monitoring through `/api/participation/falcon1024/results` and `/api/participation/mldsa87/results`, each with independent state and benchmark-specific announcement headings.
 - Backfilled the first Falcon-1024 and ML-DSA-87 announcements after their initial silent seed. The temporary backfill route was removed immediately after both messages were sent.
+- Routed Falcon-512, Falcon-1024, and ML-DSA-44 Telegram record videos into their matching forum topics. ML-DSA-87 routing is pending its thread ID.
 - PR creation remains blocked until the production frontend repository URL is confirmed.
