@@ -141,9 +141,9 @@ Do not copy Yukon branding, data, or unrelated terminology.
 
 ## Telegram record watcher
 
-The deployed Cloudflare Worker broadcasts verified Falcon, Falcon-1024, ML-DSA-44, and ML-DSA-87 records into a Telegram group. It polls `/api/participation/falcon/results`, `/api/participation/falcon1024/results`, `/api/participation/mldsa/results`, and `/api/participation/mldsa87/results`, keeps separate KV state for each benchmark, seeds each current record on first run without posting, and announces later records only when their score is lower than the previous best.
+The deployed Cloudflare Worker broadcasts verified Falcon, Falcon-1024, ML-DSA-44, ML-DSA-87, and SLH-DSA-128s records into a Telegram group. It polls each benchmark's results endpoint, keeps separate KV state for each benchmark, seeds each current record on first run without posting, and announces later records only when their score is lower than the previous best.
 
-Telegram topic routing: Falcon-512 uses thread `437`, Falcon-1024 uses `438`, ML-DSA-44 uses `440`, and ML-DSA-87 uses `441`.
+Telegram topic routing: Falcon-512 uses thread `437`, Falcon-1024 uses `438`, ML-DSA-44 uses `440`, ML-DSA-87 uses `441`, and SLH-DSA-128s uses `561`.
 
 Required environment variables:
 
@@ -280,4 +280,5 @@ Omar's agents can use this repository as the implementation reference without co
 - Backfilled the first Falcon-1024 and ML-DSA-87 announcements after their initial silent seed. The temporary backfill route was removed immediately after both messages were sent.
 - Routed all four Telegram record videos into their matching forum topics: Falcon-512 `437`, Falcon-1024 `438`, ML-DSA-44 `440`, and ML-DSA-87 `441`.
 - Added distinct Falcon-1024 and ML-DSA-87 videos from `hmmm.gif.mp4` and `odi.gif.mp4` respectively, so every challenge now has its own media asset.
+- Added SLH-DSA-128s monitoring at `/api/participation/slhdsa/results`, with lane `SLH_DSA_128S_GAS`, independent state, and Telegram forum thread `561`. It currently reuses the ML-DSA-87 video until a dedicated SLH-DSA clip is provided.
 - PR creation remains blocked until the production frontend repository URL is confirmed.

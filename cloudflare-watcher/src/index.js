@@ -36,6 +36,15 @@ const WATCHES = [
     stateKey: 'latest-mldsa87-record',
     mediaUrl: `${REPO_RAW_URL}/mldsa87.mp4`,
     threadId: 441
+  },
+  {
+    name: 'SLHDSA128S',
+    title: 'NEW SLH-DSA-128s RECORD',
+    resultsUrl: 'https://postquantum.provably.fast/api/participation/slhdsa/results',
+    lane: 'SLH_DSA_128S_GAS',
+    stateKey: 'latest-slhdsa128s-record',
+    mediaUrl: `${REPO_RAW_URL}/mldsa87.mp4`,
+    threadId: 561
   }
 ];
 
