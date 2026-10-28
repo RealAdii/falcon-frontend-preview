@@ -1,6 +1,17 @@
 const BASE_URL = 'https://falcon.provably.fast';
 const REPO_RAW_URL = 'https://raw.githubusercontent.com/RealAdii/falcon-frontend-preview/main/assets';
+const STARKS_RECORD_URL = 'https://starks.provably.fast/data/mathematics.json';
+const STARKS_MEDIA_URL = `${REPO_RAW_URL}/starks-send-it.gif.mp4`;
 const WATCHES = [
+  {
+    name: 'STARKS',
+    title: 'NEW STARKS CONTRIBUTION',
+    resultsUrl: STARKS_RECORD_URL,
+    stateKey: 'latest-starks-contribution',
+    mediaUrl: STARKS_MEDIA_URL,
+    threadId: 632,
+    type: 'mathematics'
+  },
   {
     name: 'FALCON',
     title: 'NEW FALCON RECORD',
@@ -124,6 +135,7 @@ export default {
 };
 
 async function checkForRecord(watch, env) {
+  if (watch.type === 'mathematics') return checkStarks(watch, env);
   const {record} = await getBoard(watch);
   const previous = await env.STATE.get(watch.stateKey, 'json');
   const shouldAnnounce = previous && record.score_l2_gas < Number(previous.score_l2_gas);
@@ -142,4 +154,38 @@ async function checkForRecord(watch, env) {
     await env.STATE.put(watch.stateKey, JSON.stringify({score_l2_gas: record.score_l2_gas, job_id: record.job_id, updated_at: new Date().toISOString()}));
     console.log(`${watch.name} watcher state updated`);
   }
+}
+
+async function checkStarks(watch, env) {
+  const response = await fetch(watch.resultsUrl, {signal: AbortSignal.timeout(15000), headers: {'cache-control': 'no-cache'}});
+  if (!response.ok) throw new Error(`STARKs record returned ${response.status}`);
+  const board = await response.json();
+  if (board.schema !== 'proven-mathematics/0' || !Array.isArray(board.contributions)) throw new Error('Unexpected STARKs mathematics record schema');
+  const previous = await env.STATE.get(watch.stateKey, 'json');
+  const accepted = board.contributions.filter((item) => item.status === 'accepted');
+  const latest = accepted[0];
+  const ids = new Set(previous?.ids || []);
+  if (!previous) {
+    await env.STATE.put(watch.stateKey, JSON.stringify({ids: accepted.map((item) => item.id).slice(0, 200), updated_at: new Date().toISOString()}));
+    return;
+  }
+  const fresh = accepted.filter((item) => !ids.has(item.id)).reverse();
+  for (const item of fresh) {
+    const person = (item.who || []).join(', ') || 'Open contributor';
+    const target = (board.targets || []).find((entry) => entry.id === item.target);
+    const link = item.url || (item.thread ? `https://starks.provably.fast/threads#${encodeURIComponent(item.thread)}` : 'https://starks.provably.fast/record');
+    const caption = [
+      `🏆 <b>${item.target || 'STARKs'} CONTRIBUTION ACCEPTED</b>`,
+      '',
+      `${escapeHtml(person)} · ${escapeHtml(item.kind || 'contribution')}`,
+      '',
+      `<b>${escapeHtml(item.title || 'New accepted contribution')}</b>`,
+      target ? `Target: ${escapeHtml(target.title)}` : '',
+      '',
+      `<a href="${link}">Open contribution ↗</a>`
+    ].filter(Boolean).join('\n');
+    await sendTelegram(caption, watch.mediaUrl, watch.threadId, env);
+  }
+  const known = [...new Set([...(previous.ids || []), ...accepted.map((item) => item.id)])].slice(-200);
+  await env.STATE.put(watch.stateKey, JSON.stringify({ids: known, latest_id: latest?.id || null, updated_at: new Date().toISOString()}));
 }
