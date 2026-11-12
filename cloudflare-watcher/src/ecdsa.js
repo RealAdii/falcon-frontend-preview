@@ -11,12 +11,17 @@ async function get(path) {
   return response.json();
 }
 
-export async function checkEcdsa(watch, env) {
+export async function getEcdsaBenchmark() {
   const {benchmark} = await get(`/benchmarks/${ECDSA_BENCHMARK_ID}`);
   if (benchmark?.id !== ECDSA_BENCHMARK_ID || benchmark.mode !== 'scalar'
       || benchmark.direction !== '-' || benchmark.promotionMode !== 'automatic'
       || benchmark.sourceUrl !== 'https://github.com/Layr-Labs/ecdsafail-challenge'
       || !integer(benchmark.currentBestScore)) throw new Error('Unexpected ECDSA.fail benchmark identity or score');
+  return benchmark;
+}
+
+export async function checkEcdsa(watch, env) {
+  const benchmark = await getEcdsaBenchmark();
   const previous = await env.STATE.get(watch.stateKey, 'json');
   if (previous && (previous.benchmark_id !== ECDSA_BENCHMARK_ID || !integer(previous.score))) {
     throw new Error('Unexpected ECDSA.fail watcher state');

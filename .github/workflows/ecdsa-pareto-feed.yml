@@ -1,0 +1,48 @@
+name: ECDSA Pareto feed
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ecdsa-pareto-feed.yml'
+      - 'scripts/update-ecdsa-pareto.mjs'
+      - 'cloudflare-watcher/src/ecdsa-pareto.js'
+      - 'cloudflare-watcher/src/submissions-stream.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ecdsa-pareto-feed
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate checked projection
+        run: node scripts/update-ecdsa-pareto.mjs "$RUNNER_TEMP/ecdsa-pareto.json"
+      - name: Publish generated snapshot
+        run: |
+          if git fetch origin ecdsa-pareto-feed; then
+            git switch -c ecdsa-pareto-feed FETCH_HEAD
+          else
+            git switch --orphan ecdsa-pareto-feed
+          fi
+          cp "$RUNNER_TEMP/ecdsa-pareto.json" ecdsa-pareto.json
+          git add ecdsa-pareto.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Refresh ECDSA Pareto projection'
+          git push origin HEAD:ecdsa-pareto-feed

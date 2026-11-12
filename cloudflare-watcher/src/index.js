@@ -1,5 +1,6 @@
 import {captionText, escapeHtml, sendTelegram, TelegramRateLimitError} from './telegram.js';
 import {checkEcdsa} from './ecdsa.js';
+import {checkEcdsaPareto} from './ecdsa-pareto.js';
 
 const BASE_URL = 'https://falcon.provably.fast';
 const REPO_RAW_URL = 'https://raw.githubusercontent.com/RealAdii/falcon-frontend-preview/main/assets';
@@ -13,6 +14,14 @@ export const WATCHES = [
     chatId: '-1004497882136',
     threadId: 142092,
     type: 'ecdsa'
+  },
+  {
+    name: 'ECDSA_PARETO',
+    stateKey: 'latest-ecdsa-pareto',
+    mediaUrl: `${REPO_RAW_URL}/ecdsa-record.mp4`,
+    chatId: '-1004497882136',
+    threadId: 142092,
+    type: 'ecdsa-pareto'
   },
   {
     name: 'STARKS',
@@ -132,6 +141,7 @@ export default {
 
 async function checkForRecord(watch, env) {
   if (watch.type === 'ecdsa') return checkEcdsa(watch, env);
+  if (watch.type === 'ecdsa-pareto') return checkEcdsaPareto(watch, env);
   if (watch.type === 'mathematics') return checkStarks(watch, env);
   const {record} = await getBoard(watch);
   const previous = await env.STATE.get(watch.stateKey, 'json');
