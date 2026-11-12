@@ -265,7 +265,9 @@ Omar's agents can use this repository as the implementation reference without co
 - Routed ECDSA.fail to the owner's topic `142092` and retained STARKS topic `632`.
 - Added the owner-supplied dance GIF as `assets/ecdsa-record.gif` and its silent H.264 counterpart as `assets/ecdsa-record.mp4`. ECDSA announcements use Telegram animations.
 - Added `npm run test:watchers`, syntax checks for the Worker modules, and a dependency-free Node CI lane. Local tests cover duplicate prevention, partial batch failure, cooldowns, caption limits, topic routing, benchmark identity, promotion binding, score consistency, and failed delivery.
-- Deployment and a production cron observation must be recorded after release. Local tests do not establish live Telegram delivery.
+- Released source `ae7200a594007482d2b74b71319b31d876e5bee2` through PR #1 after all 16 tests and the exact-head CI check passed. Its tree matches the locally checked and deployed tree.
+- Deployed Worker version `12718825-c3f0-4d30-90a8-4367eff28254` with the existing one-minute schedule and secret bindings. The first production cron at 07:59 UTC seeded ECDSA score 887265786 and all 539 accepted STARKS IDs; both KV records were independently read back. The 08:00 UTC cron completed without reseeding or announcement errors. All five existing signature watches completed in both polls, with no subrequest exhaustion.
+- Verified the published MP4 against the local converted asset by SHA-256. No historical record or synthetic test announcement was posted for the release. Delivery of a future genuine record remains an operational observation to make when one occurs.
 
 ### 2026-10-21
 
