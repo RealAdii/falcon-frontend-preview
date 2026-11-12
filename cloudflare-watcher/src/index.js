@@ -184,7 +184,7 @@ export async function checkStarks(watch, env) {
     try {
       const candidate = new URL(item.url);
       if (candidate.protocol === 'https:' && candidate.hostname === 'starks.provably.fast'
-          && !candidate.username && !candidate.password && candidate.href.length <= 180) link = candidate.href;
+          && !candidate.username && !candidate.password && escapeHtml(candidate.href).length <= 180) link = candidate.href;
     } catch { /* Use the record page when the row has no public URL. */ }
     const budget = captionText;
     const caption = [
@@ -192,7 +192,7 @@ export async function checkStarks(watch, env) {
       '',
       `${budget(person, 100)} · ${budget(item.kind || 'contribution', 35)}`,
       '',
-      `<b>${budget(item.title || 'New accepted contribution', 500)}</b>`,
+      `<b>${budget(item.title || 'New accepted contribution', 450)}</b>`,
       target ? `Target: ${budget(target.title, 100)}` : '',
       '',
       `<a href="${escapeHtml(link)}">Open contribution ↗</a>`

@@ -115,6 +115,18 @@ test('duplicate contribution IDs and malformed state fail before delivery', asyn
   await assert.rejects(checkStarks(starks, env), /Invalid STARKS watcher state/);
 });
 
+test('the complete STARKS caption budget includes every field and escaped link', async () => {
+  const env = environment({[starks.stateKey]: JSON.stringify({version: 2, ids: []})});
+  const row = {...contribution(1), target: 'T'.repeat(1000), title: '&'.repeat(1000),
+    who: ['W'.repeat(1000)], kind: 'K'.repeat(1000), url: 'https://starks.provably.fast/?' + '&'.repeat(120)};
+  const board = {...starksBoard([row]), targets: [{id: row.target, title: 'N'.repeat(1000)}]};
+  starksNetwork(board, (options) => {
+    assert.ok(options.body.get('caption').length <= 1024);
+    return json({ok: true});
+  });
+  await checkStarks(starks, env);
+});
+
 test('Telegram HTTP success without an affirmative acknowledgement is not delivery', async () => {
   const env = environment();
   globalThis.fetch = async (url) => url.includes('api.telegram.org')
