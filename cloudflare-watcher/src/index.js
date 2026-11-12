@@ -1,8 +1,19 @@
+import {captionText, escapeHtml, sendTelegram, TelegramRateLimitError} from './telegram.js';
+import {checkEcdsa} from './ecdsa.js';
+
 const BASE_URL = 'https://falcon.provably.fast';
 const REPO_RAW_URL = 'https://raw.githubusercontent.com/RealAdii/falcon-frontend-preview/main/assets';
 const STARKS_RECORD_URL = 'https://starks.provably.fast/data/mathematics.json';
 const STARKS_MEDIA_URL = `${REPO_RAW_URL}/starks-send-it.gif.mp4`;
-const WATCHES = [
+export const WATCHES = [
+  {
+    name: 'ECDSA',
+    stateKey: 'latest-ecdsa-record',
+    mediaUrl: `${REPO_RAW_URL}/ecdsa-record.mp4`,
+    chatId: '-1004497882136',
+    threadId: 142092,
+    type: 'ecdsa'
+  },
   {
     name: 'STARKS',
     title: 'NEW STARKS CONTRIBUTION',
@@ -59,12 +70,6 @@ const WATCHES = [
   }
 ];
 
-const escapeHtml = (value) => String(value ?? '')
-  .replaceAll('&', '&amp;')
-  .replaceAll('<', '&lt;')
-  .replaceAll('>', '&gt;')
-  .replaceAll('"', '&quot;');
-
 const formatGas = (value) => Number(value).toLocaleString('en-US');
 
 function formatMessage(record, comparisonGas, title) {
@@ -100,31 +105,22 @@ async function getBoard(watch) {
   return {record: {...record, score_l2_gas: Number(record.score_l2_gas)}, baseline};
 }
 
-async function sendTelegram(text, mediaUrl, threadId, env) {
-  const media = await fetch(mediaUrl);
-  if (!media.ok) throw new Error(`Announcement media returned ${media.status}`);
-
-  const form = new FormData();
-  form.append('chat_id', env.TELEGRAM_CHAT_ID);
-  form.append('video', await media.blob(), mediaUrl.split('/').pop());
-  form.append('caption', text);
-  form.append('parse_mode', 'HTML');
-  if (threadId !== null) form.append('message_thread_id', String(threadId));
-
-  const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendVideo`, {
-    method: 'POST',
-    body: form
-  });
-  if (!response.ok) throw new Error(`Telegram returned ${response.status}`);
-}
-
 export default {
   async scheduled(controller, env, ctx) {
+    const retryAt = Number(await env.STATE.get('telegram-retry-after'));
+    if (retryAt > Date.now()) {
+      console.log('Telegram cooldown active; announcements deferred');
+      return;
+    }
     for (const watch of WATCHES) {
       try {
         await checkForRecord(watch, env);
       } catch (error) {
-        console.error(`${watch.name} watcher failed`, error instanceof Error ? error.stack : error);
+        console.error(`${watch.name} watcher failed`, error instanceof Error ? error.message : String(error));
+        if (error instanceof TelegramRateLimitError) {
+          await env.STATE.put('telegram-retry-after', String(Date.now() + error.retryAfter * 1000));
+          break;
+        }
       }
     }
   },
@@ -135,6 +131,7 @@ export default {
 };
 
 async function checkForRecord(watch, env) {
+  if (watch.type === 'ecdsa') return checkEcdsa(watch, env);
   if (watch.type === 'mathematics') return checkStarks(watch, env);
   const {record} = await getBoard(watch);
   const previous = await env.STATE.get(watch.stateKey, 'json');
@@ -156,36 +153,56 @@ async function checkForRecord(watch, env) {
   }
 }
 
-async function checkStarks(watch, env) {
+export async function checkStarks(watch, env) {
   const response = await fetch(watch.resultsUrl, {signal: AbortSignal.timeout(15000), headers: {'cache-control': 'no-cache'}});
   if (!response.ok) throw new Error(`STARKs record returned ${response.status}`);
   const board = await response.json();
   if (board.schema !== 'proven-mathematics/0' || !Array.isArray(board.contributions)) throw new Error('Unexpected STARKs mathematics record schema');
   const previous = await env.STATE.get(watch.stateKey, 'json');
   const accepted = board.contributions.filter((item) => item.status === 'accepted');
+  if (accepted.some((item) => !/^M-\d{4,}$/.test(item.id))
+      || new Set(accepted.map((item) => item.id)).size !== accepted.length) {
+    throw new Error('Invalid or duplicate STARKS contribution identity');
+  }
   const latest = accepted[0];
-  const ids = new Set(previous?.ids || []);
-  if (!previous) {
-    await env.STATE.put(watch.stateKey, JSON.stringify({ids: accepted.map((item) => item.id).slice(0, 200), updated_at: new Date().toISOString()}));
+  // Legacy state was truncated and only saved after the whole batch. Reseed it once
+  // without replaying the historical backlog into the group.
+  if (!previous || previous.version !== 2) {
+    await env.STATE.put(watch.stateKey, JSON.stringify({version: 2, ids: accepted.map((item) => item.id), latest_id: latest?.id || null, updated_at: new Date().toISOString()}));
+    console.log(JSON.stringify({watch: watch.name, action: 'seeded', accepted: accepted.length}));
     return;
   }
-  const fresh = accepted.filter((item) => !ids.has(item.id)).reverse();
+  if (!Array.isArray(previous.ids) || previous.ids.some((id) => !/^M-\d{4,}$/.test(id))) {
+    throw new Error('Invalid STARKS watcher state');
+  }
+  const ids = new Set(previous.ids);
+  const fresh = accepted.filter((item) => !ids.has(item.id)).sort((a, b) => Number(a.id.slice(2)) - Number(b.id.slice(2))).slice(0, 3);
   for (const item of fresh) {
     const person = (item.who || []).join(', ') || 'Open contributor';
     const target = (board.targets || []).find((entry) => entry.id === item.target);
-    const link = item.url || (item.thread ? `https://starks.provably.fast/threads#${encodeURIComponent(item.thread)}` : 'https://starks.provably.fast/record');
+    let link = 'https://starks.provably.fast/record';
+    try {
+      const candidate = new URL(item.url);
+      if (candidate.protocol === 'https:' && candidate.hostname === 'starks.provably.fast'
+          && !candidate.username && !candidate.password && candidate.href.length <= 180) link = candidate.href;
+    } catch { /* Use the record page when the row has no public URL. */ }
+    const budget = captionText;
     const caption = [
-      `🏆 <b>${item.target || 'STARKs'} CONTRIBUTION ACCEPTED</b>`,
+      `🏆 <b>${budget(item.target || 'STARKs', 30)} CONTRIBUTION ACCEPTED</b>`,
       '',
-      `${escapeHtml(person)} · ${escapeHtml(item.kind || 'contribution')}`,
+      `${budget(person, 100)} · ${budget(item.kind || 'contribution', 35)}`,
       '',
-      `<b>${escapeHtml(item.title || 'New accepted contribution')}</b>`,
-      target ? `Target: ${escapeHtml(target.title)}` : '',
+      `<b>${budget(item.title || 'New accepted contribution', 500)}</b>`,
+      target ? `Target: ${budget(target.title, 100)}` : '',
       '',
-      `<a href="${link}">Open contribution ↗</a>`
+      `<a href="${escapeHtml(link)}">Open contribution ↗</a>`
     ].filter(Boolean).join('\n');
     await sendTelegram(caption, watch.mediaUrl, watch.threadId, env);
+    ids.add(item.id);
+    // Retain successful delivery before attempting another message.
+    await env.STATE.put(watch.stateKey, JSON.stringify({version: 2, ids: [...ids], latest_id: item.id, updated_at: new Date().toISOString()}));
+    console.log(JSON.stringify({watch: watch.name, action: 'announced', id: item.id}));
+    // KV permits one write per second to a key. Also space Telegram group sends.
+    if (item !== fresh[fresh.length - 1]) await new Promise((resolve) => setTimeout(resolve, 1100));
   }
-  const known = [...new Set([...(previous.ids || []), ...accepted.map((item) => item.id)])].slice(-200);
-  await env.STATE.put(watch.stateKey, JSON.stringify({ids: known, latest_id: latest?.id || null, updated_at: new Date().toISOString()}));
 }

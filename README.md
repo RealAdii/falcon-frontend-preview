@@ -47,4 +47,16 @@ contributor · model
 Open record ↗
 ```
 
-The repository also includes a GitHub Actions fallback at `.github/workflows/falcon-telegram-watcher.yml`. It runs every 5 minutes, stores the last seen record in the repository, and keeps the Telegram credentials in GitHub Secrets. The first manual run completed successfully.
+The repository also includes a manual GitHub Actions fallback at `.github/workflows/falcon-telegram-watcher.yml`. Its automatic schedule is disabled to avoid duplicate announcements. Production polling runs in the Cloudflare Worker every minute.
+
+## Scheduled announcement topics
+
+The Worker in `cloudflare-watcher/` watches the five signature gas benchmarks, accepted STARKS contributions, and ECDSA.fail's evaluator-promoted qubit-Toffoli product record. ECDSA.fail uses topic `142092` in the group supplied by the owner. STARKS retains topic `632`.
+
+ECDSA.fail uses the supplied dance GIF at `assets/ecdsa-record.gif`. Its silent H.264 copy, `assets/ecdsa-record.mp4`, is sent with Telegram's `sendAnimation` method so it loops as an animation. The first ECDSA poll seeds the existing record without announcing historical work. Later polls require a lower official score, the pinned benchmark identity, a matching promotion commit and accepted submission, and consistent qubit/Toffoli metrics. The commit lookup avoids loading the public all-submissions response, which exceeded 30 MB during implementation.
+
+STARKS state version 2 retains every known accepted contribution ID, sends at most three new contributions per poll, and saves progress after each acknowledged message. Legacy state is seeded once without historical backfill because its incomplete delivery history cannot establish which old messages already reached the group. Sends are spaced to respect KV's per-key write limit. Telegram 429 responses defer remaining work until `retry_after` expires. KV and Telegram are separate services: interruption between delivery and checkpointing can still cause a duplicate, so this is not an exactly-once delivery guarantee.
+
+Validate with `npm run check` and `npm run test:watchers`. Tests mock Telegram and never post to the group. `.github/workflows/watcher-checks.yml` runs both commands on pull requests and main.
+
+Deploy from `cloudflare-watcher/` using `npm exec --yes --ignore-scripts --package=wrangler@4.129.0 -- wrangler deploy`. Keep the existing Cloudflare-managed Telegram secrets and KV binding. The public health endpoint does not trigger announcements.

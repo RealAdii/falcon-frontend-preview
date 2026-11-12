@@ -16,7 +16,7 @@ Each update must add a dated entry to the change log, update the current status 
 
 ## Current status
 
-Last updated: 2026-10-21
+Last updated: 2026-11-12
 
 The standalone landing page preview is implemented and running at `http://localhost:5186`.
 
@@ -256,6 +256,16 @@ The standalone preview is now available in the public GitHub repository:
 Omar's agents can use this repository as the implementation reference without collaborator access. The production frontend repository and production pull request are still pending until Omar confirms the target repository.
 
 ## Change log
+
+### 2026-11-12
+
+- Fixed STARKS delivery progress: keep all accepted IDs, checkpoint each successful send, bound each poll to three announcements, space KV writes, and honor Telegram cooldowns. Live inspection found a stuck November 6 checkpoint, repeated Telegram 429 responses, and exhausted Worker subrequests affecting later watches.
+- Migrate incomplete legacy STARKS state silently instead of replaying the historical backlog.
+- Added ECDSA.fail record watching for benchmark `1ffb695a-309b-46b6-a728-2f97d8c7be74`, using the public benchmark, its GitHub promotion commit, and the matching accepted submission receipt. Only a lower evaluator-promoted qubit-Toffoli product announces.
+- Routed ECDSA.fail to the owner's topic `142092` and retained STARKS topic `632`.
+- Added the owner-supplied dance GIF as `assets/ecdsa-record.gif` and its silent H.264 counterpart as `assets/ecdsa-record.mp4`. ECDSA announcements use Telegram animations.
+- Added `npm run test:watchers`, syntax checks for the Worker modules, and a dependency-free Node CI lane. Local tests cover duplicate prevention, partial batch failure, cooldowns, caption limits, topic routing, benchmark identity, promotion binding, score consistency, and failed delivery.
+- Deployment and a production cron observation must be recorded after release. Local tests do not establish live Telegram delivery.
 
 ### 2026-10-21
 
